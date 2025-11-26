@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ujian Madrasah - Fikih XII</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* === PALET WARNA HIJAU & PUTIH === */
+            --primary: #2e7d32;       /* Hijau Madrasah (Utama) */
+            --primary-dark: #1b5e20;  /* Hijau Tua (Hover) */
+            --primary-light: #e8f5e9; /* Hijau Sangat Muda (Background) */
+            --accent: #ffeb3b;        /* Kuning (Highlight/Fokus) */
+            --text: #333333;          /* Hitam Abu (Teks) */
+            --white: #ffffff;
+            --border: #c8e6c9;        /* Border Hijau Tipis */
+            --shadow: 0 4px 15px rgba(46, 125, 50, 0.1);
+            
+            --header-height: 65px;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f8e9; /* Background halaman agak kehijauan sangat muda */
+            color: var(--text);
+            margin: 0;
+            padding-top: var(--header-height);
+            font-size: 16px; /* Ukuran font standar */
+            transition: font-size 0.2s ease; /* Animasi saat font diperbesar */
+        }
+
+        /* === HEADER (NAVBAR ATAS) === */
+        header {
+            background: var(--white);
+            height: var(--header-height);
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 1000;
+            border-bottom: 3px solid var(--primary); /* Garis hijau di bawah header */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+        }
+        .brand h1 {
+            font-size: 1.1rem;
+            margin: 0;
+            color: var(--primary);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .brand span { font-size: 0.75rem; color: #666; }
+
+        .header-tools {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* TIMER BADGE */
+        .timer {
+            background: var(--primary);
+            color: var(--white);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        /* === SLIDER FONT (FITUR YANG ANDA CARI) === */
+        .font-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f1f8e9;
+            padding: 5px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        
+        .font-icon { 
+            font-size: 0.8rem; font-weight: bold; color: var(--primary); user-select: none;
+        }
+        .font-icon.big { font-size: 1.2rem; }
+        
+        /* Custom Design untuk Slider Range */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 80px; /* Lebar slider */
+            height: 6px;
+            background: #b9f6ca;
+            border-radius: 3px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid var(--white);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* TOMBOL MENU NAVIGASI */
+        .nav-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .nav-toggle-btn span {
+            display: block;
+            width: 26px;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* === LAYOUT UTAMA === */
+        .app-container {
+            display: flex;
+            min-height: calc(100vh - var(--header-height));
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* AREA SOAL */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            transition: margin-right 0.3s ease;
+            max-width: 100%;
+        }
+
+        /* SIDEBAR (NAVIGATOR) */
+        .sidebar {
+            width: 300px;
+            background: var(--white);
+            border-left: 1px solid var(--border);
+            position: fixed;
+            top: var(--header-height);
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transform: translateX(0); /* Default Terbuka di PC */
+            transition: transform 0.3s ease;
+            z-index: 900;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+        }
+
+        /* Keadaan Tertutup (Closed) */
+        .sidebar.closed { transform: translateX(100%); }
+
+        /* Penyesuaian Margin Konten Utama */
+        .app-container.sidebar-open .main-content { margin-right: 300px; }
+        .app-container.sidebar-closed .main-content { margin-right: 0; }
+
+        /* === KARTU SOAL === */
+        .question-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            max-width: 900px;
+            margin: 0 auto;
+            border-top: 5px solid var(--primary); /* Aksen Hijau di atas kartu */
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 15px;
+            align-items: center;
+        }
+        
+        .q-badge {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 700;
+            border: 1px solid var(--border);
+        }
+
+        .q-text {
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        /* OPSI JAWABAN */
+        .option-item {
+            display: flex;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            align-items: center;
+            background: #fafafa;
+        }
+        .option-item:hover { 
+            background: var(--primary-light); 
+            border-color: var(--primary); 
+        }
+        .option-item.selected { 
+            background: #e8f5e9; 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 1px var(--primary) inset;
+        }
+        .option-item input { 
+            margin-right: 15px; 
+            transform: scale(1.3); 
+            accent-color: var(--primary); 
+        }
+
+        /* TEXTAREA ESSAY */
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+        }
+        textarea:focus { outline: none; border-color: var(--primary); background: #fafafa; }
+
+        /* TOMBOL NEXT/PREV */
+        .nav-btns {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 10px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+            flex: 1;
+        }
+        .btn-prev { background: #cfd8dc; color: #455a64; }
+        .btn-next { background: var(--primary); color: white; }
+        .btn-next:hover { background: var(--primary-dark); }
+        .btn-submit { background: #d32f2f; color: white; }
+
+        /* === NAVIGATOR GRID (KOTAK NOMOR) === */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .nav-box {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .nav-box:hover { background: #e0e0e0; }
+        .nav-box.filled { background: var(--primary); color: white; } /* Hijau jika sudah dijawab */
+        .nav-box.current { 
+            border-color: var(--accent); 
+            background: #fff9c4;
+            color: var(--primary-dark);
+            box-shadow: 0 0 0 2px var(--accent); 
+            z-index: 2; 
+        }
+
+        /* OVERLAY GELAP (MOBILE) */
+        .overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 899;
+            display: none;
+        }
+        .overlay.active { display: block; }
+
+        /* HALAMAN HASIL */
+        #result-screen { display: none; text-align: center; padding-top: 50px; }
+        .score-circle {
+            width: 150px; height: 150px; border-radius: 50%;
+            background: var(--primary); color: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            margin: 0 auto 20px;
+            font-size: 3.5rem; font-weight: 800;
+            box-shadow: 0 10px 20px rgba(46, 125, 50, 0.4);
+        }
+
+        /* === RESPONSIVE CSS (HP) === */
+        @media (max-width: 900px) {
+            /* Di HP, sidebar defaultnya tertutup (hidden) */
+            .sidebar { transform: translateX(100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            
+            .app-container.sidebar-open .main-content { margin-right: 0; }
+            .app-container.sidebar-closed .main-content { margin-right: 0; }
+            
+            /* Header di HP */
+            .brand h1 { font-size: 1rem; }
+            .brand span { display: none; } /* Sembunyikan sub-judul agar slider muat */
+            
+            .question-card { padding: 20px; margin-top: 0; }
+            
+            /* PENTING: Slider tetap muncul tapi lebih kecil */
+            input[type=range] { width: 60px; } 
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <h1>Ujian Fikih</h1>
+        <span>Kelas XII - MA Pekalongan</span>
+    </div>
+
+    <div class="header-tools">
+        <div class="timer" id="timer">90:00</div>
+
+        <div class="font-slider-container" title="Geser untuk ubah ukuran huruf">
+            <span class="font-icon">A</span>
+            <input type="range" id="fontSlider" min="14" max="24" value="16" oninput="changeFontSize(this.value)">
+            <span class="font-icon big">A</span>
+        </div>
+
+        <button class="nav-toggle-btn" onclick="toggleNavigator()" title="Buka/Tutup Soal">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</header>
+
+<div class="app-container sidebar-open" id="appContainer">
+    
+    <main class="main-content">
+        <div class="question-card" id="qCard">
+            </div>
+
+        <div class="nav-btns">
+            <button class="btn btn-prev" id="btnPrev" onclick="prevQ()">Sebelumnya</button>
+            <button class="btn btn-next" id="btnNext" onclick="nextQ()">Berikutnya</button>
+        </div>
+    </main>
+
+    <aside class="sidebar" id="sidebar">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <h3 style="margin:0; color:var(--primary);">Navigasi Soal</h3>
+            <button onclick="toggleNavigator()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">&times;</button>
+        </div>
+        
+        <div style="margin-bottom:20px;">
+            <div style="font-size:0.85rem; margin-bottom:5px; display:flex; justify-content:space-between; color:#666;">
+                <span>Progres:</span>
+                <span id="progText" style="font-weight:bold; color:var(--primary);">0%</span>
+            </div>
+            <div style="height:8px; background:#e8f5e9; border-radius:4px; overflow:hidden;">
+                <div id="progBar" style="height:100%; width:0%; background:var(--primary); transition:0.3s;"></div>
+            </div>
+        </div>
+
+        <div class="nav-grid" id="navGrid"></div>
+    </aside>
+
+    <div class="overlay" id="overlay" onclick="toggleNavigator()"></div>
+</div>
+
+<div id="result-screen">
+    <h2>Ujian Selesai</h2>
+    <div class="score-circle">
+        <span id="scoreVal">0</span>
+        <span style="font-size:1rem; font-weight:400;">Nilai PG</span>
+    </div>
+    <p style="color:#666;">*Jawaban Essay tersimpan di bawah ini untuk dikoreksi Guru*</p>
+    
+    <div class="question-card" style="text-align:left; margin-top:30px;" id="reviewArea"></div>
+    
+    <button class="btn btn-prev" onclick="location.reload()" style="margin:30px 0; background:#546e7a; color:white;">Kembali ke Halaman Awal</button>
+</div>
+
+<script>
+    // --- DATABASE 60 SOAL ---
+    const questions = [
+        // A. Pilihan Ganda (1-30)
+        { id: 1, type: 'mc', q: "Secara etimologi (bahasa), kata Fiqh berarti ....", o: ["Jalan yang lurus", "Aturan hukum", "Paham atau mengerti secara mendalam", "Ketetapan Allah", "Norma kehidupan"], a: 2 },
+        { id: 2, type: 'mc', q: "Secara bahasa, Ushul merupakan bentuk jamak dari Ashlun yang berarti ....", o: ["Cabang", "Ranting", "Buah", "Pondasi atau dasar", "Dinding"], a: 3 },
+        { id: 3, type: 'mc', q: "Objek pembahasan dari Ushul Fikih adalah ....", o: ["Perbuatan orang mukallaf", "Dalil-dalil syara' (hukum Islam)", "Sejarah nabi", "Masalah akidah", "Akhlak manusia"], a: 1 },
+        { id: 4, type: 'mc', q: "Hukum mempelajari ilmu Fikih untuk keperluan ibadah sehari-hari adalah ....", o: ["Fardhu Kifayah", "Fardhu 'Ain", "Sunnah Muakkad", "Mubah", "Makruh"], a: 1 },
+        { id: 5, type: 'mc', q: "'Segala perbuatan orang mukallaf baik yang berupa ucapan maupun perbuatan.' Ini objek pembahasan dari ....", o: ["Ilmu Tauhid", "Ilmu Tasawuf", "Ilmu Fikih", "Ilmu Ushul Fikih", "Ilmu Kalam"], a: 2 },
+        { id: 6, type: 'mc', q: "Tujuan utama mempelajari ilmu Fikih adalah ....", o: ["Menjadi hakim agung", "Agar dianggap alim", "Mencapai kebahagiaan dunia akhirat dengan hukum Allah", "Mengetahui sejarah", "Berdebat"], a: 2 },
+        { id: 7, type: 'mc', q: "Salah satu tujuan mempelajari Ushul Fikih adalah ....", o: ["Menghafal hadis", "Mampu mengistimbatkan hukum dari dalilnya", "Biografi ulama", "Berfatwa sembarangan", "Mengubah hukum"], a: 1 },
+        { id: 8, type: 'mc', q: "Fungsi Sunnah terhadap Al-Qur'an sebagai Bayan Tafsir artinya ....", o: ["Menetapkan hukum baru", "Menjelaskan ayat yang global", "Menghapus hukum", "Menguatkan hukum", "Mengganti ayat"], a: 1 },
+        { id: 9, type: 'mc', q: "Hadis dasar Ijma': 'Umatku tidak akan bersepakat dalam....'", o: ["Kebaikan", "Kesesatan", "Ibadah", "Perang", "Harta"], a: 1 },
+        { id: 10, type: 'mc', q: "Sejarah pertumbuhan Ushul Fikih (kodifikasi) dimulai sistematis pada masa Imam ....", o: ["Abu Hanifah", "Malik", "Syafi'i", "Ahmad", "Ja'far"], a: 2 },
+        { id: 11, type: 'mc', q: "Sumber hukum Islam yang Muttafaq (disepakati) adalah ....", o: ["Al-Qur'an, Hadis, Ijma', Qiyas", "Al-Qur'an, Hadis, Istihsan", "Al-Qur'an, 'Urf", "Al-Qur'an, Ijma', Saddud Dzari'ah", "Al-Qur'an, Mazhab Shahabi"], a: 0 },
+        { id: 12, type: 'mc', q: "Sumber hukum yang diperselisihkan keberadaannya disebut ....", o: ["Muttafaq", "Mukhtalaf", "Qath'i", "Zhanni", "Aqli"], a: 1 },
+        { id: 13, type: 'mc', q: "Maksud sumber hukum Mukhtalaf adalah ....", o: ["Wajib diikuti", "Kebenaran mutlak", "Tidak disepakati penggunaannya oleh seluruh ulama", "Wahyu semata", "Tidak berlaku"], a: 2 },
+        { id: 14, type: 'mc', q: "Syariat nabi terdahulu yang masih berlaku jika tidak dihapus syariat kita disebut ....", o: ["'Urf", "Istishab", "Syar'u man qoblana", "Maslahah Mursalah", "Mazhab Shahabi"], a: 2 },
+        { id: 15, type: 'mc', q: "Hadis berupa ketetapan atau diamnya Nabi atas perbuatan sahabat disebut Hadis ....", o: ["Qauliyah", "Fi'liyah", "Taqririyah", "Hammiyah", "Ahwaliyah"], a: 2 },
+        { id: 16, type: 'mc', q: "Mengerahkan kemampuan menggali hukum syara' dari dalil rinci disebut ....", o: ["Jihad", "Ijtihad", "Ittiba'", "Taqlid", "Talfiq"], a: 1 },
+        { id: 17, type: 'mc', q: "Mengikuti pendapat ulama dengan mengetahui dalilnya disebut ....", o: ["Taqlid", "Ittiba'", "Ijtihad", "Bid'ah", "Talfiq"], a: 1 },
+        { id: 18, type: 'mc', q: "Yang termasuk Mujtahid Mutlak dari Mazahibul Arba'ah adalah ....", o: ["Imam Bukhari", "Imam Muslim", "Imam Al-Ghazali", "Imam Syafi'i", "Imam Nawawi"], a: 3 },
+        { id: 19, type: 'mc', q: "Titah Allah (Khitabullah) yang berkaitan dengan perbuatan mukallaf disebut ....", o: ["Hukum Syara'", "Hukum Adat", "Hukum Akal", "Hukum Positif", "Undang-undang"], a: 0 },
+        { id: 20, type: 'mc', q: "Hukum syara' dibagi menjadi dua: Hukum Taklifi dan Hukum ....", o: ["Wadh'i", "Amali", "I'tiqadi", "Jina'i", "Muamalah"], a: 0 },
+        { id: 21, type: 'mc', q: "Jenis hukum Taklifi ada 5, yaitu ....", o: ["Sebab, Syarat, Mani'", "Wajib, Sunnah, Haram, Makruh, Mubah", "Fardhu Ain, Fardhu Kifayah", "Wajib, Mandub, Mahzhur, Jaiz", "Halal, Haram"], a: 1 },
+        { id: 22, type: 'mc', q: "Sesuatu yang menjadi tanda adanya hukum (ada sebab ada hukum) disebut ....", o: ["Syarat", "Sebab", "Mani'", "Rukshah", "'Azimah"], a: 1 },
+        { id: 23, type: 'mc', q: "Perbuatan seorang mukallaf yang dikenai hukum syara' disebut ....", o: ["Al-Hakim", "Mahkum 'Alaih", "Mahkum Fih", "Mahkum Bih", "Mukallaf"], a: 2 },
+        { id: 24, type: 'mc', q: "Contoh Mahkum Fih (perbuatan hukum) adalah ....", o: ["Orang gila shalat", "Anak kecil puasa", "Gerakan shalat dan bacaan Qur'an", "Allah pembuat hukum", "Malaikat"], a: 2 },
+        { id: 25, type: 'mc', q: "Dasar hukum kaidah Al-Umuru bi Maqashidiha adalah hadis ....", o: ["La dharara", "Innamal a'malu bin niyat", "Al-bayyinatu", "Al-masyaqqatu", "Al-yaqinu"], a: 1 },
+        { id: 26, type: 'mc', q: "Makna kaidah Al-Umuru bi Maqashidiha adalah ....", o: ["Keyakinan kuat", "Hilangkan mudharat", "Segala perkara tergantung niat", "Adat jadi hukum", "Kesulitan bawa kemudahan"], a: 2 },
+        { id: 27, type: 'mc', q: "Contoh kaidah Al-Yaqinu la yuzalu bis syak adalah ....", o: ["Ragu wudhu maka dianggap belum", "Jamak shalat", "Makan bangkai darurat", "Jual beli lelang", "Niat puasa"], a: 0 },
+        { id: 28, type: 'mc', q: "Arti kaidah Al-Masyaqqatu Tajlibut Taisir adalah ....", o: ["Niat ukuran amal", "Hilangkan bahaya", "Keyakinan kuat", "Kesulitan mendatangkan kemudahan", "Adat jadi hukum"], a: 3 },
+        { id: 29, type: 'mc', q: "Arti kaidah Ad-Dhararu Yuzalu adalah ....", o: ["Bahaya harus dihilangkan", "Adat adalah hakim", "Niat menentukan amal", "Keraguan dibuang", "Kesulitan bawa kemudahan"], a: 0 },
+        { id: 30, type: 'mc', q: "Syarat 'Urf dapat dijadikan hukum adalah ....", o: ["Bertentangan dengan nash", "Tidak bertentangan dengan dalil syara'", "Berlaku golongan tertentu", "Baru terjadi", "Untung materi"], a: 1 },
+        
+        // B. Essay (31-45)
+        { id: 31, type: 'essay', q: "Jelaskan pengertian Fikih menurut istilah para ahli ushul fikih!", a: "Ilmu tentang hukum syara' yang bersifat amaliyah yang digali dari dalil-dalil yang terperinci." },
+        { id: 32, type: 'essay', q: "Sebutkan 4 sumber hukum Islam yang Muttafaq secara berurutan!", a: "1. Al-Qur'an, 2. Hadis/Sunnah, 3. Ijma', 4. Qiyas." },
+        { id: 33, type: 'essay', q: "Sebutkan satu karya kitab monumental dari Imam Syafi'i dan Imam Malik!", a: "Imam Syafi'i: Al-Umm / Ar-Risalah. Imam Malik: Al-Muwatha'." },
+        { id: 34, type: 'essay', q: "Jelaskan urutan sumber hukum yang harus dirujuk Mujtahid!", a: "Pertama Al-Qur'an, jika tidak ada ke Sunnah, jika tidak ada ke Ijma', lalu Qiyas." },
+        { id: 35, type: 'essay', q: "Siapakah Al-Hakim dalam tinjauan Ushul Fikih?", a: "Allah SWT sebagai pembuat hukum (Asy-Syari')." },
+        { id: 36, type: 'essay', q: "Berikan contoh aplikasi kaidah Al-Umuru bi Maqashidiha selain ibadah!", a: "Dalam muamalah: Niat memberikan uang kepada pejabat untuk suap (haram) atau hadiah (boleh/sunnah)." },
+        { id: 37, type: 'essay', q: "Berikan contoh penerapan kaidah cabang Al-Yaqinu la yuzalu bis syak!", a: "Asal sebuah benda adalah suci sampai terbukti ada najisnya." },
+        { id: 38, type: 'essay', q: "Jelaskan kaidah Ad-Dhararu Yuzalu dan contoh medis!", a: "Bahaya harus dihilangkan. Contoh: Memperbolehkan amputasi organ tubuh yang busuk agar tidak menjalar ke seluruh tubuh." },
+        { id: 39, type: 'essay', q: "Jelaskan perbedaan hukum Taklifi dan hukum Wadh'i!", a: "Taklifi: Tuntutan perbuatan (wajib, sunnah, dll). Wadh'i: Ketetapan yang menghubungkan sesuatu sebagai sebab, syarat, atau penghalang." },
+        { id: 40, type: 'essay', q: "Contoh penerapan kaidah Al-'Adatu Muhakkamah dalam jual beli!", a: "Jual beli buah di pohon yang sudah menjadi kebiasaan masyarakat dan tidak ada penipuan." },
+        { id: 41, type: 'essay', q: "Ceritakan singkat sejarah tadwin Ushul Fikih!", a: "Dibukukan pertama kali secara sistematis oleh Imam Syafi'i dalam kitab Ar-Risalah pada abad ke-2 H." },
+        { id: 42, type: 'essay', q: "Sebutkan macam-macam Qiyas!", a: "Qiyas Aula, Qiyas Musawi, Qiyas Adna." },
+        { id: 43, type: 'essay', q: "Apa yang dimaksud Mujtahid Fatwa?", a: "Ulama yang mampu mentarjih (menguatkan) pendapat imam mazhabnya untuk difatwakan." },
+        { id: 44, type: 'essay', q: "Tuliskan/jelaskan dalil perintah Ittiba'!", a: "QS. An-Nisa: 59 'Taatlah kepada Allah, Rasul, dan Ulil Amri di antara kamu'." },
+        { id: 45, type: 'essay', q: "Sebutkan 5 Kaidah Induk (Qawaidul Khamsah)!", a: "1. Al-Umuru bi Maqashidiha, 2. Al-Yaqinu la yuzalu bis syak, 3. Al-Masyaqqatu tajlibut taisir, 4. Ad-Dhararu yuzalu, 5. Al-Adatu muhakkamah." },
+        
+        // C. Tambahan (46-60)
+        { id: 46, type: 'mc', q: "Yang BUKAN syarat seorang Mujtahid adalah ....", o: ["Paham bhs Arab", "Paham nasikh mansukh", "Hafal kitab Taurat/Injil", "Tahu ayat hukum", "Tahu Ushul Fikih"], a: 2 },
+        { id: 47, type: 'mc', q: "Dalam Qiyas khamr, 'sifat memabukkan' disebut sebagai ....", o: ["Ashl", "Far'un", "Illat", "Hukmu Ashl", "Syarat"], a: 2 },
+        { id: 48, type: 'mc', q: "Hukum Wadh'i yang menjadi penghalang berlakunya hukum taklifi (cth: haid) disebut ....", o: ["Mani'", "Sebab", "Syarat", "'Azimah", "Rukshah"], a: 0 },
+        { id: 49, type: 'mc', q: "Mazhab mayoritas di Indonesia adalah ....", o: ["Hanafi", "Maliki", "Syafi'i", "Hambali", "Zhahiri"], a: 2 },
+        { id: 50, type: 'mc', q: "Kaidah 'Asal segala sesuatu adalah boleh' berlaku dalam masalah ....", o: ["Ibadah", "Muamalah", "Akidah", "Akhlak", "Sejarah"], a: 1 },
+        { id: 51, type: 'mc', q: "Orang yang mengikuti ulama tanpa tahu dalilnya disebut ....", o: ["Mujtahid", "Muttabi'", "Muqallid", "Mufti", "Mustafti"], a: 2 },
+        { id: 52, type: 'mc', q: "Kitab Al-Risalah disusun oleh ....", o: ["Abu Hanifah", "Malik", "Syafi'i", "Ahmad", "Ghazali"], a: 2 },
+        { id: 53, type: 'mc', q: "Istihsan banyak digunakan oleh Mazhab ....", o: ["Syafi'i", "Hanafi", "Maliki", "Hambali", "Syiah"], a: 1 },
+        { id: 54, type: 'mc', q: "Mengambil kemudahan dalam hukum Islam saat darurat disebut ....", o: ["'Azimah", "Talfiq", "Rukshah", "Bid'ah", "Syubhat"], a: 2 },
+        { id: 55, type: 'mc', q: "Contoh Saddud Dzari'ah (menutup jalan keburukan) adalah ....", o: ["Larang jual senjata saat perang saudara", "Wajib shalat", "Anjurkan sedekah", "Jual beli online", "Larang puasa raya"], a: 0 },
+        { id: 56, type: 'essay', q: "Jelaskan perbedaan Haram Lidzatihi dan Haram Lighairihi!", a: "Lidzatihi: Haram karena zatnya (babi). Lighairihi: Haram karena faktor luar (makanan curian)." },
+        { id: 57, type: 'essay', q: "Apa itu Maslahah Mursalah? Berikan contoh!", a: "Menetapkan hukum berdasar kemaslahatan yang tidak ada dalil khusus. Contoh: Pencatatan nikah, rambu lalu lintas." },
+        { id: 58, type: 'essay', q: "Jelaskan posisi akal dalam sumber hukum Islam!", a: "Akal sebagai alat untuk memahami wahyu, bukan sumber hukum yang berdiri sendiri menandingi wahyu." },
+        { id: 59, type: 'essay', q: "Apa perbedaan Mazhab dan Manhaj?", a: "Mazhab cenderung pada hasil pemikiran hukum (produk). Manhaj adalah metodologi berpikir/pengambilan hukumnya." },
+        { id: 60, type: 'essay', q: "Sebutkan 3 syarat agar Qiyas dianggap sah!", a: "1. Ada Asal (pokok), 2. Ada Far'u (cabang), 3. Ada Illat yang sama, 4. Ada hukum asal." }
+    ];
+
+    // --- LOGIC APP ---
+    let curIdx = 0;
+    let answers = JSON.parse(localStorage.getItem('ans_fiqih_final')) || {};
+    let timeLeft = 90 * 60;
+    let timerInt;
+
+    window.onload = () => {
+        setupMobile();
+        loadQ(curIdx);
+        renderNav();
+        startTimer();
+    };
+
+    // Deteksi Layar (HP atau PC)
+    function setupMobile() {
+        if(window.innerWidth > 900) {
+            document.getElementById('appContainer').classList.remove('sidebar-closed');
+            document.getElementById('appContainer').classList.add('sidebar-open');
+        } else {
+            document.getElementById('appContainer').classList.remove('sidebar-open');
+            document.getElementById('appContainer').classList.add('sidebar-closed');
+            document.getElementById('sidebar').classList.add('closed');
+        }
+    }
+
+    // Toggle Sidebar
+    function toggleNavigator() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const app = document.getElementById('appContainer');
+        const isMobile = window.innerWidth <= 900;
+
+        if (isMobile) {
+            sidebar.classList.toggle('open');
+            sidebar.classList.toggle('closed');
+            overlay.classList.toggle('active');
+        } else {
+            // Desktop
+            sidebar.classList.toggle('closed');
+            if(sidebar.classList.contains('closed')) {
+                app.classList.remove('sidebar-open');
+                app.classList.add('sidebar-closed');
+            } else {
+                app.classList.remove('sidebar-closed');
+                app.classList.add('sidebar-open');
+            }
+        }
+    }
+
+    // Ganti Ukuran Font
+    function changeFontSize(val) {
+        document.body.style.fontSize = val + 'px';
+    }
+
+    // Muat Soal
+    function loadQ(idx) {
+        const q = questions[idx];
+        const card = document.getElementById('qCard');
+        
+        let html = `
+            <div class="q-header">
+                <span style="font-weight:800; color:var(--primary); font-size:1.1em;">Soal No. ${idx+1}</span>
+                <span class="q-badge">${q.type === 'mc' ? 'Pilihan Ganda' : 'Essay'}</span>
+            </div>
+            <div class="q-text">${q.q}</div>
+        `;
+
+        if (q.type === 'mc') {
+            html += `<div>`;
+            q.o.forEach((opt, i) => {
+                const isSel = answers[q.id] == i;
+                html += `
+                    <div class="option-item ${isSel ? 'selected' : ''}" onclick="selectOpt(${q.id}, ${i})">
+                        <input type="radio" name="r${q.id}" ${isSel ? 'checked' : ''}>
+                        <span>${['A','B','C','D','E'][i]}. ${opt}</span>
+                    </div>`;
+            });
+            html += `</div>`;
+        } else {
+            html += `<textarea placeholder="Ketik jawaban Anda..." oninput="saveAns(${q.id}, this.value)">${answers[q.id] || ''}</textarea>`;
+        }
+        card.innerHTML = html;
+
+        // Tombol
+        document.getElementById('btnPrev').disabled = idx === 0;
+        const btnNext = document.getElementById('btnNext');
+        if(idx === questions.length - 1) {
+            btnNext.innerText = "Kumpulkan";
+            btnNext.className = "btn btn-submit";
+            btnNext.onclick = finish;
+        } else {
+            btnNext.innerText = "Berikutnya";
+            btnNext.className = "btn btn-next";
+            btnNext.onclick = nextQ;
+        }
+
+        renderNav();
+    }
+
+    function selectOpt(qid, val) {
+        answers[qid] = val;
+        save();
+        loadQ(curIdx);
+    }
+    
+    function saveAns(qid, val) {
+        answers[qid] = val;
+        save();
+        renderNav();
+    }
+
+    function save() { localStorage.setItem('ans_fiqih_final', JSON.stringify(answers)); }
+    function nextQ() { if(curIdx < questions.length-1) { curIdx++; loadQ(curIdx); } }
+    function prevQ() { if(curIdx > 0) { curIdx--; loadQ(curIdx); } }
+
+    function jump(i) {
+        curIdx = i; loadQ(curIdx);
+        if(window.innerWidth <= 900) toggleNavigator(); // Auto close di HP
+    }
+
+    // Render Grid Nomor
+    function renderNav() {
+        const grid = document.getElementById('navGrid');
+        grid.innerHTML = '';
+        let filled = 0;
+        
+        questions.forEach((q, i) => {
+            const hasAns = answers[q.id] !== undefined && answers[q.id] !== '';
+            if(hasAns) filled++;
+            
+            const box = document.createElement('div');
+            box.className = `nav-box ${hasAns ? 'filled' : ''} ${i === curIdx ? 'current' : ''}`;
+            box.innerText = i+1;
+            box.onclick = () => jump(i);
+            grid.appendChild(box);
+        });
+
+        const pct = Math.round((filled / questions.length) * 100);
+        document.getElementById('progText').innerText = pct + '%';
+        document.getElementById('progBar').style.width = pct + '%';
+    }
+
+    function startTimer() {
+        const el = document.getElementById('timer');
+        timerInt = setInterval(() => {
+            if(timeLeft <= 0) { clearInterval(timerInt); finish(true); return; }
+            timeLeft--;
+            const m = Math.floor(timeLeft/60);
+            const s = timeLeft%60;
+            el.innerText = `${m}:${s<10?'0':''}${s}`;
+            if(timeLeft < 300) el.style.background = '#d32f2f';
+        }, 1000);
+    }
+
+    function finish(force=false) {
+        if(!force && !confirm("Yakin ingin mengumpulkan ujian?")) return;
+        
+        clearInterval(timerInt);
+        document.getElementById('appContainer').style.display = 'none';
+        document.querySelector('header').style.display = 'none';
+        
+        const res = document.getElementById('result-screen');
+        res.style.display = 'block';
+
+        let score = 0, pgCount = 0;
+        let html = '';
+
+        questions.forEach((q, i) => {
+            const ans = answers[q.id];
+            
+            html += `<div style="border-bottom:1px solid #eee; padding:15px; background:${i%2===0?'#fafafa':'#fff'};">`;
+            html += `<strong>No ${i+1} (${q.type === 'mc' ? 'PG' : 'Essay'})</strong><br><span style="color:#555">${q.q}</span><br>`;
+            
+            if(q.type === 'mc') {
+                pgCount++;
+                const isCorrect = ans == q.a;
+                if(isCorrect) score++;
+                
+                const userAnsText = ans !== undefined ? ['A','B','C','D','E'][ans] + '. ' + q.o[ans] : '<span style="color:red">Tidak dijawab</span>';
+                const keyText = ['A','B','C','D','E'][q.a] + '. ' + q.o[q.a];
+                
+                html += `<div style="margin-top:10px;">Status: <span style="font-weight:bold; color:${isCorrect?'green':'red'}">${isCorrect?'BENAR':'SALAH'}</span></div>`;
+                html += `<div>Jawaban Anda: <strong>${userAnsText}</strong></div>`;
+                if(!isCorrect) html += `<div style="color:#2e7d32">Kunci: ${keyText}</div>`;
+                
+            } else {
+                html += `<div style="margin-top:10px; background:#fff3e0; padding:10px; border-radius:5px;">Jawaban Anda: ${ans || '-'}</div>`;
+                html += `<div style="color:#ef6c00; font-size:0.9em; margin-top:5px;">Poin Kunci: ${q.a}</div>`;
+            }
+            html += `</div>`;
+        });
+
+        const finalScore = pgCount > 0 ? Math.round((score/pgCount)*100) : 0;
+        document.getElementById('scoreVal').innerText = finalScore;
+        document.getElementById('reviewArea').innerHTML = html;
+        localStorage.removeItem('ans_fiqih_final');
+        window.scrollTo(0,0);
+    }
+</script>
+
+</body>
+</html>
